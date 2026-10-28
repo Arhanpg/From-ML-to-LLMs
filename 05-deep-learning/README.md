@@ -70,3 +70,27 @@ These are diagnostic hints, not proofs. Data size, noise, model capacity, and ta
 3. Why can a large learning rate destabilize training?
 4. What information does a validation curve provide?
 5. Why is backpropagation not the same as the optimizer?
+
+
+## First complete project: MNIST handwriting recognition
+
+This project classifies handwritten digits (0–9) from 28 × 28 grayscale images using a dense neural network built with NumPy.
+
+- [Annotated Jupyter notebook](notebooks/MNIST_Neural_Network_From_Scratch.ipynb) — the original learning flow plus explanations and full-set evaluation.
+- [Deep implementation and backpropagation guide](mnist_neural_network_from_scratch.md) — preprocessing, parameter shapes, forward pass, softmax/cross-entropy derivative, ReLU derivative, gradient shapes, and limitations of the original experiment.
+- [Runnable NumPy implementation](mnist_numpy_nn.py) — reproducible initialization, mini-batch training, loss reporting, and separate full test-set metrics.
+- [Optional MNIST requirements](requirements-mnist.txt).
+
+Install the MNIST-specific dependencies from the repository root:
+
+    python -m pip install -r 05-deep-learning/requirements-mnist.txt
+
+Run the companion script:
+
+    python 05-deep-learning/mnist_numpy_nn.py --epochs 5 --batch-size 256
+
+The uploaded notebook uses full-batch gradient descent and reports its training accuracy. The companion script uses shuffled mini-batches by default for a more practical local run, prints explicit cross-entropy loss, and evaluates the held-out test set after training. These runs need not produce the same metrics.
+
+### Key lesson
+
+Backpropagation applies the chain rule to calculate gradients of the loss with respect to every weight and bias. Gradient descent uses those gradients to update the parameters. These are related but distinct operations.
