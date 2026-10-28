@@ -49,6 +49,10 @@ Install dependencies:
     python -m pip install --upgrade pip
     python -m pip install -r requirements.txt
 
+The MNIST notebook/script has an optional TensorFlow dependency for loading the dataset. Install it only when working on that lesson:
+
+    python -m pip install -r 05-deep-learning/requirements-mnist.txt
+
 Run examples from the repository root:
 
     python 02-python-for-ml/numpy_basics.py
