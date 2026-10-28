@@ -62,6 +62,12 @@ Checkpoint: defend a metric choice and identify a way it could mislead you.
 
 Checkpoint: explain one training step from input batch to parameter update.
 
+### First hands-on deep-learning project: MNIST
+
+After learning the basics of dense layers, activations, and gradient descent, study the repository's [MNIST NumPy network](05-deep-learning/mnist_numpy_nn.py), [annotated notebook](05-deep-learning/notebooks/MNIST_Neural_Network_From_Scratch.ipynb), and [deep backpropagation walkthrough](05-deep-learning/mnist_neural_network_from_scratch.md). The project connects tensor shapes, forward propagation, softmax with cross-entropy, the chain rule, ReLU's derivative, parameter gradients, and held-out test evaluation.
+
+Before moving on, try to explain each gradient's shape and use the provided finite-difference tests to check selected derivatives.
+
 ## 06 — NLP and transformers
 
 - [ ] Tokenization, token IDs, and embeddings.
