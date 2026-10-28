@@ -51,6 +51,7 @@ Run the unit tests from the repository root:
 - [MNIST NumPy implementation](05-deep-learning/mnist_numpy_nn.py)
 - [Deep MNIST implementation and backpropagation guide](05-deep-learning/mnist_neural_network_from_scratch.md)
 - [Optional MNIST requirements](05-deep-learning/requirements-mnist.txt)
+- [MNIST network tests and finite-difference gradient checks](05-deep-learning/test_mnist_numpy_nn.py)
 - [Transformer and attention overview](06-transformers/README.md)
 - [Self-attention with NumPy](06-transformers/self_attention_numpy.py)
 - [Attention exercises](06-transformers/attention_exercises.md)
