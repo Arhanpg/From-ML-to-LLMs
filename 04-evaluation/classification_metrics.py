@@ -47,9 +47,10 @@ def recall(actual: np.ndarray, predicted: np.ndarray) -> float:
 
 
 def f1_score(actual: np.ndarray, predicted: np.ndarray) -> float:
+    """Harmonic mean of precision and recall, defined as zero if both are zero."""
     p = precision(actual, predicted)
     r = recall(actual, predicted)
-    return _ratio(int(round(2.0 * p * r * 1_000_000)), int(round((p + r) * 1_000_000)))
+    return (2.0 * p * r / (p + r)) if (p + r) else 0.0
 
 
 def main() -> None:
