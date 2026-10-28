@@ -94,3 +94,10 @@ The uploaded notebook uses full-batch gradient descent and reports its training 
 ### Key lesson
 
 Backpropagation applies the chain rule to calculate gradients of the loss with respect to every weight and bias. Gradient descent uses those gradients to update the parameters. These are related but distinct operations.
+
+
+Run the MNIST network's unit tests (these tests do not download MNIST or require TensorFlow):
+
+    python -m unittest discover -s 05-deep-learning -p "test_mnist*.py"
+
+The suite checks tensor shapes, softmax probability normalization, one-hot encoding, and selected analytical gradients against central finite differences. A passing gradient check provides evidence that the backward formulas match the loss for the tested tiny network; it does not prove every possible input or training configuration is correct.
