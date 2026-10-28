@@ -477,7 +477,7 @@ for i in range(1, epochs + 1):
         Z1, A1, Z2, A2, W1, W2, X, Y
     )
     W1, b1, W2, b2 = update_params(
-        W1, b1, W2, dW1, db1, dW2, db2, alpha
+        W1, b1, W2, b2, dW1, db1, dW2, db2, alpha
     )
 ~~~
 
