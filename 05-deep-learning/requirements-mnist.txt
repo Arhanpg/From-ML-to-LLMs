@@ -1,5 +1,5 @@
-# Install these in addition to the repository's main requirements.txt
-# TensorFlow is used only to download/load MNIST in this project; the neural
-# network, forward propagation, backpropagation, and updates use NumPy.
--r ../requirements.txt
+# Optional dependencies for the MNIST notebook/script.
+# TensorFlow is used only to load MNIST; the network itself uses NumPy.
+numpy>=1.26
+matplotlib>=3.8
 tensorflow
