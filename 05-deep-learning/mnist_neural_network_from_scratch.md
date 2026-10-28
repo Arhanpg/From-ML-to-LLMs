@@ -271,7 +271,34 @@ The output logits are Z2 and softmax produces A2. With categorical cross-entropy
 dZ2 = A2 - Y
 ~~~
 
-Why does this work? For one example, softmax gives p_k = exp(z_k) / sum_j exp(z_j), while cross-entropy is L = -sum_k y_k log(p_k). Differentiating the combination of these expressions with respect to a logit z_j simplifies to p_j - y_j.
+Why does this work? For one example, softmax gives:
+
+~~~text
+p_k = exp(z_k) / sum_l exp(z_l)
+~~~
+
+The derivative of a softmax probability with respect to a logit is:
+
+~~~text
+dp_k/dz_j = p_k * (1[k = j] - p_j)
+~~~
+
+Here 1[k = j] is 1 when k and j are the same class and 0 otherwise. Cross-entropy for that example is:
+
+~~~text
+L = -sum_k y_k * log(p_k)
+~~~
+
+Apply the chain rule:
+
+~~~text
+dL/dz_j = -sum_k y_k * (1/p_k) * (dp_k/dz_j)
+         = -sum_k y_k * (1[k = j] - p_j)
+         = -y_j + p_j * sum_k y_k
+         = p_j - y_j
+~~~
+
+The final step uses the fact that one-hot targets sum to 1. This is why the softmax-plus-cross-entropy combination gives the compact output error signal A2 - Y. For a mean loss across m examples, a factor 1/m belongs in the final parameter gradients; this implementation introduces that factor when computing dW and db.
 
 Therefore:
 
