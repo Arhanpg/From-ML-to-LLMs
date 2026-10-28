@@ -70,9 +70,13 @@ Run examples from the repository root:
 
 See CONTRIBUTING.md for the structure used for new lessons. Several examples use deterministic synthetic data, so you can run them without downloading datasets or configuring API keys.
 
-Run the unit tests from the repository root:
+Run the evaluation metric tests from the repository root:
 
     python -m unittest discover -s 04-evaluation -p 'test_*.py'
+
+Run the neural-network tests, including finite-difference checks of backpropagation:
+
+    python -m unittest discover -s 05-deep-learning -p 'test_mnist*.py'
 
 ## Repository principles
 
