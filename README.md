@@ -4,6 +4,8 @@ A concept-first, hands-on learning repository for Artificial Intelligence, Machi
 
 The goal is not just to collect snippets. Each topic should help you understand what a concept does, why it works, when to use it, how to implement it, and how to test your understanding.
 
+**Browse the lessons:** [INDEX.md](INDEX.md) · [ROADMAP.md](ROADMAP.md) · [CONTRIBUTING.md](CONTRIBUTING.md)
+
 ## What you will find
 
 - Concept notes with intuition, terminology, assumptions, and limitations.
@@ -52,6 +54,9 @@ Run examples from the repository root:
     python 02-python-for-ml/numpy_basics.py
     python 02-python-for-ml/pandas_basics.py
     python 03-machine-learning/linear_regression_from_scratch.py
+    python 03-machine-learning/logistic_regression_from_scratch.py
+    python 06-transformers/self_attention_numpy.py
+    python 08-rag/tfidf_retrieval_demo.py
 
 ## How to study a topic
 
@@ -62,7 +67,11 @@ Run examples from the repository root:
 5. Try a small exercise without looking at the solution.
 6. Revisit the idea later and implement it from memory.
 
-See CONTRIBUTING.md for the structure used for new lessons.
+See CONTRIBUTING.md for the structure used for new lessons. Several examples use deterministic synthetic data, so you can run them without downloading datasets or configuring API keys.
+
+Run the unit tests from the repository root:
+
+    python -m unittest discover -s 04-evaluation -p 'test_*.py'
 
 ## Repository principles
 
