@@ -16,7 +16,7 @@ The goal is not just to collect snippets. Each topic should help you understand 
 
 ## Learning roadmap
 
-Follow ROADMAP.md for the suggested order.
+Follow ROADMAP.md for the suggested order. The first end-to-end neural-network project is documented in [the MNIST backpropagation guide](05-deep-learning/mnist_neural_network_from_scratch.md), with an [annotated notebook](05-deep-learning/notebooks/MNIST_Neural_Network_From_Scratch.ipynb) and [runnable NumPy script](05-deep-learning/mnist_numpy_nn.py).
 
 | Stage | Topics | Goal |
 |---|---|---|
@@ -55,6 +55,7 @@ Run examples from the repository root:
     python 02-python-for-ml/pandas_basics.py
     python 03-machine-learning/linear_regression_from_scratch.py
     python 03-machine-learning/logistic_regression_from_scratch.py
+    python 05-deep-learning/mnist_numpy_nn.py --epochs 5 --batch-size 256
     python 06-transformers/self_attention_numpy.py
     python 08-rag/tfidf_retrieval_demo.py
 
