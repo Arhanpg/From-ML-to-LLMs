@@ -76,8 +76,8 @@ These are diagnostic hints, not proofs. Data size, noise, model capacity, and ta
 
 This project classifies handwritten digits (0–9) from 28 × 28 grayscale images using a dense neural network built with NumPy.
 
-- [Annotated Jupyter notebook](notebooks/MNIST_Neural_Network_From_Scratch.ipynb) — the original learning flow plus explanations and full-set evaluation.
-- [Deep implementation and backpropagation guide](mnist_neural_network_from_scratch.md) — preprocessing, parameter shapes, forward pass, softmax/cross-entropy derivative, ReLU derivative, gradient shapes, and limitations of the original experiment.
+- [Annotated Jupyter notebook](notebooks/MNIST_Neural_Network_From_Scratch.ipynb) — the from-scratch model, detailed backpropagation derivation, vanilla gradient descent, NumPy Adam implementation, and code to evaluate both models on all 10,000 test images.
+- [Deep implementation and backpropagation guide](mnist_neural_network_from_scratch.md) — preprocessing, parameter shapes, forward pass, softmax/cross-entropy derivative, ReLU derivative, full-batch gradient descent, calculus and stationary points, loss-function selection, Adam mathematics, and careful interpretation of the saved experiment.
 - [Runnable NumPy implementation](mnist_numpy_nn.py) — reproducible initialization, mini-batch training, loss reporting, and separate full test-set metrics.
 - [Optional MNIST requirements](requirements-mnist.txt).
 
@@ -89,7 +89,9 @@ Run the companion script:
 
     python 05-deep-learning/mnist_numpy_nn.py --epochs 5 --batch-size 256
 
-The uploaded notebook uses full-batch gradient descent and reports its training accuracy. The companion script uses shuffled mini-batches by default for a more practical local run, prints explicit cross-entropy loss, and evaluates the held-out test set after training. These runs need not produce the same metrics.
+The updated notebook compares **vanilla full-batch gradient descent** with a NumPy implementation of **Adam**. Its saved outputs show 89.88% and 96.14% respectively at epoch 150, but these are displayed **training accuracies**, not test accuracies. The notebook explains that the two runs use different learning rates and independent random initializations, and that the printed metric is calculated from the forward pass before that epoch's update. A final code cell recomputes train/test cross-entropy and accuracy for both trained parameter sets; run that cell to obtain the full test results.
+
+The companion script uses shuffled mini-batches by default for a more practical local run, prints explicit cross-entropy loss, and evaluates the held-out test set after training. Its metrics need not match the full-batch notebook experiment.
 
 ### Key lesson
 
@@ -101,3 +103,16 @@ Run the MNIST network's unit tests (these tests do not download MNIST or require
     python -m unittest discover -s 05-deep-learning -p "test_mnist*.py"
 
 The suite checks tensor shapes, softmax probability normalization, one-hot encoding, and selected analytical gradients against central finite differences. A passing gradient check provides evidence that the backward formulas match the loss for the tested tiny network; it does not prove every possible input or training configuration is correct.
+
+
+## Why the notebook does not solve dy/dx = 0 directly
+
+The derivative condition f'(x) = 0 identifies stationary points for suitable one-variable problems; it does not prove a point is a global minimum. A neural network has 50,890 parameters in this example, so a stationary point would require every partial derivative to be zero simultaneously. Those equations are coupled and the loss surface is generally non-convex. Backpropagation is still calculus: it uses the chain rule to calculate the gradients. The optimizer uses those gradients to make iterative parameter updates. The detailed guide explains why a zero gradient does not certify a global minimum or good test performance.
+
+## Why cross-entropy rather than MAE/RMSE?
+
+This model performs ten-class classification and outputs probabilities with softmax. Its output gradient, A2 - Y, is the standard derivative associated with softmax plus categorical cross-entropy and one-hot targets. The notebook does not print a cross-entropy loss during training, but that is the objective implied by the gradient formula. MAE and RMSE are common regression metrics; they can be applied to one-hot classification targets, but cross-entropy is generally the more suitable probability-based objective because it strongly penalizes assigning very low probability to the correct class. Accuracy is a separate metric, not the differentiable loss.
+
+## What Adam changes
+
+Vanilla gradient descent applies the current gradient directly. Adam maintains a moving average of gradients (first moment) and a moving average of squared gradients (second raw moment), corrects their initialization bias, and uses both to scale each parameter's update. The notebook implementation is **Adam, not AdamW**: it does not add decoupled weight decay. The saved Adam result is best treated as an observed training result from this run, not as a claim of 96.14% test accuracy or a guarantee that Adam always outperforms vanilla gradient descent.
