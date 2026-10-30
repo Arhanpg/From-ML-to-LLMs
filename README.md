@@ -16,7 +16,7 @@ The goal is not just to collect snippets. Each topic should help you understand 
 
 ## Learning roadmap
 
-Follow ROADMAP.md for the suggested order. The first end-to-end neural-network project is documented in [the MNIST backpropagation guide](05-deep-learning/mnist_neural_network_from_scratch.md), with an [annotated notebook](05-deep-learning/notebooks/MNIST_Neural_Network_From_Scratch.ipynb) and [runnable NumPy script](05-deep-learning/mnist_numpy_nn.py).
+Follow ROADMAP.md for the suggested order. The first end-to-end neural-network project is documented in [the MNIST backpropagation guide](05-deep-learning/mnist_neural_network_from_scratch.md), with an [annotated notebook](05-deep-learning/notebooks/MNIST_Neural_Network_From_Scratch.ipynb) and [runnable NumPy script](05-deep-learning/mnist_numpy_nn.py). The notebook now compares vanilla full-batch gradient descent with a NumPy Adam implementation, explains why the derivative condition is not a shortcut to a global minimum, and discusses why softmax classification uses cross-entropy rather than MAE/RMSE as its usual objective.
 
 | Stage | Topics | Goal |
 |---|---|---|
