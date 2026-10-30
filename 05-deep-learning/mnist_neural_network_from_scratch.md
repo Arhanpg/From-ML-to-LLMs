@@ -41,7 +41,7 @@ Read these dimensions from left to right:
 
 The labels are one integer per image. The training labels therefore contain 60,000 values, and the test labels contain 10,000.
 
-The **training set** is used to adjust parameters. The **test set** should be held aside for the final evaluation on unseen examples. In the original notebook, the test images are used to show three example predictions, but the notebook does not calculate accuracy across the entire test set. The reported 90.06% is training accuracy, not test accuracy.
+The **training set** is used to adjust parameters. The **test set** should be held aside for the final evaluation on unseen examples. In the original notebook, the test images are used to show three example predictions, but the notebook does not calculate accuracy across the entire test set. The reported 89.88% is training accuracy, not test accuracy.
 
 ### What TensorFlow is doing here
 
@@ -503,9 +503,9 @@ The notebook prints these training-accuracy values:
 | 105 | 89.15% |
 | 120 | 89.50% |
 | 135 | 89.83% |
-| 150 | 90.06% |
+| 150 | 89.88% |
 
-The rise from about 10% toward 90% indicates that the network is learning useful relationships between pixels and labels. Ten-class random guessing would be around 10% on a balanced task, but this does not make 90.06% a test score. It is the accuracy calculated on training examples.
+The rise from about 10% toward 90% indicates that the network is learning useful relationships between pixels and labels. Ten-class random guessing would be around 10% on a balanced task, but this does not make 89.88% a test score. It is the accuracy calculated on training examples.
 
 ## 13. Inference and plotting test examples
 
@@ -543,7 +543,7 @@ Do not use test accuracy as a repeated tuning signal for many architecture or hy
 - Updating weights and biases with gradient descent.
 - Distinguishing training from test examples.
 
-### Limitations in the original notebook
+### Limitations in the uploaded notebook
 
 1. It does not calculate or display cross-entropy loss, even though the gradient formula is the softmax/categorical-cross-entropy gradient.
 2. It reports training accuracy, not full test accuracy.
@@ -552,7 +552,7 @@ Do not use test accuracy as a repeated tuning signal for many architecture or hy
 5. It does not set random seeds, so exact results are not guaranteed to reproduce.
 6. It flattens images, ignoring the useful spatial bias of convolutional models.
 7. It does not separately use a validation set to select the number of epochs or learning rate.
-8. It uses the accuracy based on the forward pass computed just before the parameter update when reporting the epoch metric.
+8. Both training functions calculate accuracy from A2 before applying that epoch's parameter update.
 
 These points do not invalidate the project. They clarify its role: it is an educational implementation of a small network and its gradients, not a production-quality handwritten-digit service.
 
@@ -561,15 +561,15 @@ These points do not invalidate the project. They clarify its role: it is an educ
 Change one thing at a time and record the same evaluation metrics.
 
 1. Add mean cross-entropy loss reporting and plot loss by epoch.
-2. Evaluate the complete test set and report test accuracy separately from training accuracy.
+2. Evaluate both trained models on the complete test set and report test accuracy separately from training accuracy.
 3. Set a random seed so that initialization and example selection can be reproduced.
-4. Compare learning rates such as 0.05, 0.15, and 0.3 using the same split and seed.
+4. Compare learning rates using the same data split and initialization.
 5. Compare 32, 64, and 128 hidden units.
 6. Compare full-batch and mini-batch training.
 7. Inspect a confusion matrix to see which digits are most often confused.
-8. Compare the dense network with a small convolutional network, then explain why the architecture changes performance.
-9. Implement a numerical gradient check on a tiny network: approximate a parameter's derivative with a small finite difference and compare it with backpropagation.
-10. Save the parameters and verify that loading them reproduces predictions.
+8. Compare the dense network with a small convolutional network.
+9. Implement a numerical gradient check on a tiny network.
+10. Save model parameters and verify that loading them reproduces predictions.
 
 ## 16. Backpropagation self-check
 
@@ -582,34 +582,48 @@ Try to answer these without looking at the previous sections:
 5. Why do dW1 and dW2 have the same shapes as W1 and W2?
 6. Why are the batch gradients averaged by m?
 7. What is the difference between calculating a gradient and updating a parameter?
-8. Why does the notebook's 90.06% result not establish 90.06% test accuracy?
+8. Why does the notebook's 96.14% result not establish 96.14% test accuracy?
 9. Why is a random seed useful when comparing two learning-rate experiments?
 10. What could go wrong if the learning rate is too large?
-
-If you can answer these and reproduce the shapes of every intermediate matrix, you understand the core of this project rather than just being able to run it.
 
 ## 17. Optimization: why not just set dy/dx = 0?
 
 For a differentiable one-variable function f(x), an interior local minimum has f'(x) = 0. This is a necessary condition under the stated assumptions, not a complete method for finding the global minimum. A stationary point can be a local minimum, a local maximum, or a saddle/flat point; a boundary minimum is another possibility. For example, f(x) = x^3 has derivative zero at x = 0, but that point is not a minimum. For f(x) = x^2, setting f'(x) = 2x to zero gives x = 0, which is the global minimum because this particular function is convex and simple.
 
-A neural network does not have one scalar x. Its loss depends on all parameters together: J(theta) = J(W1, b1, W2, b2). This network has 50,890 trainable scalar parameters. A stationary point would require all partial derivatives to vanish simultaneously: gradient_theta J(theta) = 0. That is a system of 50,890 coupled equations.
+A neural network does not have one scalar x. Its loss depends on all parameters together:
 
-The parameters interact through matrix multiplications and nonlinear activations. ReLU also makes the objective piecewise-defined. Neural-network objectives are generally non-convex, so there can be many stationary points, local minima, saddle points, and flat regions. There is no practical closed-form solution that solves this system and certifies the global minimum for this network.
+~~~text
+J(theta) = J(W1, b1, W2, b2)
+~~~
 
-Calculus is not being ignored. **Backpropagation is calculus**: it applies the chain rule to efficiently calculate the partial derivatives of the loss with respect to every weight and bias. The optimizer then uses those derivatives to choose a sequence of parameter updates. The practical loop is: initialize parameters, compute predictions, calculate gradients, update parameters, and repeat while monitoring the objective and generalization.
+This network has 50,890 trainable scalar parameters. A stationary point would require all partial derivatives to vanish simultaneously:
 
-The goal is not to prove that the global minimum has been reached. It is to find parameters with a low training objective that also perform well on unseen data. A zero or tiny gradient alone does not establish good generalization.
+~~~text
+gradient_theta J(theta) = 0
+~~~
+
+That is a system of 50,890 coupled equations. The parameters interact through matrix multiplications and nonlinear activations. ReLU also makes the objective piecewise-defined. Neural-network objectives are generally non-convex, so there can be many stationary points, local minima, saddle points, and flat regions. There is no practical closed-form solution that solves this system and certifies the global minimum for this network.
+
+Calculus is not being ignored. **Backpropagation is calculus**: it applies the chain rule to efficiently calculate the partial derivatives of the loss with respect to every weight and bias. The optimizer then uses those derivatives to choose a sequence of parameter updates.
+
+The practical loop is: initialize parameters, compute predictions, calculate gradients, update parameters, and repeat while monitoring the objective and generalization metrics. The goal is not to prove that the global minimum has been reached. It is to find parameters with a low training objective that also perform well on unseen data. A zero or tiny gradient alone does not establish good generalization.
 
 ## 18. Why cross-entropy is used instead of MAE/RMSE here
 
 The task determines which objective and metrics make sense:
 
-- **Regression** predicts a numeric quantity, such as a house price. MAE and RMSE are common measures of the size of numeric prediction errors.
+- **Regression** predicts a numeric quantity, such as a house price. MAE and RMSE are common measures of numeric prediction error.
 - **Classification** predicts a category. This network predicts one of ten mutually exclusive digits and its softmax output is a probability distribution.
 
 MAE and RMSE can technically be calculated between a one-hot target vector and a probability vector. They are not mathematically forbidden for ordinary single-label classification. However, they are usually not the preferred objective. Cross-entropy is probability-aware and directly penalizes the model when it assigns low probability to the true class.
 
-For one example, categorical cross-entropy is L = -sum_k y_k log(p_k). Because y is one-hot, if class c is correct this becomes L = -log(p_c). For a correct target [1, 0], compare:
+For one example, categorical cross-entropy is:
+
+~~~text
+L = -sum_k y_k * log(p_k)
+~~~
+
+Because y is one-hot, if class c is correct this becomes L = -log(p_c). For a correct target [1, 0], compare:
 
 | Prediction | Cross-entropy |
 |---|---:|
@@ -628,7 +642,13 @@ Both methods use the same backpropagation gradients. The difference is how they 
 
 ### Vanilla full-batch gradient descent
 
-The original gradient_descent function uses theta_t = theta_(t-1) - alpha * g_t, where g_t is the gradient of the mean training objective at the current parameters. Because the full 60,000-image matrix is used for each update, this is full-batch gradient descent: one update per epoch.
+The original gradient_descent function uses:
+
+~~~text
+theta_t = theta_(t-1) - alpha * g_t
+~~~
+
+Here g_t is the gradient of the mean training objective at the current parameters. Because the full 60,000-image matrix is used for each update, this is full-batch gradient descent: one update per epoch.
 
 ### Adam: two moving averages per parameter
 
