@@ -586,4 +586,107 @@ Try to answer these without looking at the previous sections:
 9. Why is a random seed useful when comparing two learning-rate experiments?
 10. What could go wrong if the learning rate is too large?
 
-If you can answer these and reproduce the shapes of every intermediate matrix, you understand the core of this project rather than just being able to run the notebook.
+If you can answer these and reproduce the shapes of every intermediate matrix, you understand the core of this project rather than just being able to run it.
+
+## 17. Optimization: why not just set dy/dx = 0?
+
+For a differentiable one-variable function f(x), an interior local minimum has f'(x) = 0. This is a necessary condition under the stated assumptions, not a complete method for finding the global minimum. A stationary point can be a local minimum, a local maximum, or a saddle/flat point; a boundary minimum is another possibility. For example, f(x) = x^3 has derivative zero at x = 0, but that point is not a minimum. For f(x) = x^2, setting f'(x) = 2x to zero gives x = 0, which is the global minimum because this particular function is convex and simple.
+
+A neural network does not have one scalar x. Its loss depends on all parameters together: J(theta) = J(W1, b1, W2, b2). This network has 50,890 trainable scalar parameters. A stationary point would require all partial derivatives to vanish simultaneously: gradient_theta J(theta) = 0. That is a system of 50,890 coupled equations.
+
+The parameters interact through matrix multiplications and nonlinear activations. ReLU also makes the objective piecewise-defined. Neural-network objectives are generally non-convex, so there can be many stationary points, local minima, saddle points, and flat regions. There is no practical closed-form solution that solves this system and certifies the global minimum for this network.
+
+Calculus is not being ignored. **Backpropagation is calculus**: it applies the chain rule to efficiently calculate the partial derivatives of the loss with respect to every weight and bias. The optimizer then uses those derivatives to choose a sequence of parameter updates. The practical loop is: initialize parameters, compute predictions, calculate gradients, update parameters, and repeat while monitoring the objective and generalization.
+
+The goal is not to prove that the global minimum has been reached. It is to find parameters with a low training objective that also perform well on unseen data. A zero or tiny gradient alone does not establish good generalization.
+
+## 18. Why cross-entropy is used instead of MAE/RMSE here
+
+The task determines which objective and metrics make sense:
+
+- **Regression** predicts a numeric quantity, such as a house price. MAE and RMSE are common measures of the size of numeric prediction errors.
+- **Classification** predicts a category. This network predicts one of ten mutually exclusive digits and its softmax output is a probability distribution.
+
+MAE and RMSE can technically be calculated between a one-hot target vector and a probability vector. They are not mathematically forbidden for ordinary single-label classification. However, they are usually not the preferred objective. Cross-entropy is probability-aware and directly penalizes the model when it assigns low probability to the true class.
+
+For one example, categorical cross-entropy is L = -sum_k y_k log(p_k). Because y is one-hot, if class c is correct this becomes L = -log(p_c). For a correct target [1, 0], compare:
+
+| Prediction | Cross-entropy |
+|---|---:|
+| [0.60, 0.40] | -log(0.60) = 0.511 |
+| [0.01, 0.99] | -log(0.01) = 4.605 |
+
+The second prediction is confidently wrong and receives a much larger penalty. Cross-entropy therefore provides a useful learning signal for probability-based classification.
+
+The notebook does not explicitly evaluate or print cross-entropy. However, its formula dZ2 = A2 - Y is the standard derivative for softmax combined with categorical cross-entropy and one-hot labels. The training code is therefore using cross-entropy-compatible gradients even though it does not contain a named loss function.
+
+**Loss and metric are different things.** Loss is the differentiable objective whose gradient is used for learning. Accuracy checks whether argmax selected the correct class. MAE/RMSE are often useful regression metrics, but they are not necessary headline metrics for this digit classifier. Useful classification reporting would include cross-entropy, full test accuracy, per-class precision/recall/F1, and a confusion matrix.
+
+## 19. Vanilla gradient descent versus Adam
+
+Both methods use the same backpropagation gradients. The difference is how they transform those gradients into parameter updates.
+
+### Vanilla full-batch gradient descent
+
+The original gradient_descent function uses theta_t = theta_(t-1) - alpha * g_t, where g_t is the gradient of the mean training objective at the current parameters. Because the full 60,000-image matrix is used for each update, this is full-batch gradient descent: one update per epoch.
+
+### Adam: two moving averages per parameter
+
+Adam maintains two optimizer-state arrays for every weight and bias:
+
+- m_t, the first moment estimate, is an exponentially weighted average of recent gradients. It smooths the update direction, somewhat like momentum.
+- v_t, the second raw moment estimate, is an exponentially weighted average of squared gradients. It tracks the recent scale of gradients for each parameter.
+
+For a gradient g_t:
+
+~~~text
+m_t = beta1 * m_(t-1) + (1 - beta1) * g_t
+v_t = beta2 * v_(t-1) + (1 - beta2) * (g_t ** 2)
+~~~
+
+Both moving averages start at zero, so early estimates are biased toward zero. Adam applies bias correction:
+
+~~~text
+m_hat_t = m_t / (1 - beta1 ** t)
+v_hat_t = v_t / (1 - beta2 ** t)
+~~~
+
+The update is:
+
+~~~text
+theta_t = theta_(t-1) - alpha * m_hat_t / (sqrt(v_hat_t) + epsilon)
+~~~
+
+The operations on arrays are elementwise. A parameter with a consistently large gradient magnitude can receive a different effective step scale from a parameter with smaller gradients. Adam combines momentum-like smoothing with adaptive per-parameter scaling. It still uses gradients from backpropagation and still has a learning-rate hyperparameter.
+
+In the uploaded code, the defaults are beta1 = 0.9, beta2 = 0.999, and epsilon = 1e-8; the call uses alpha = 0.003. The m and v arrays have exactly the same shapes as their corresponding parameters. They are optimizer state, not extra network layers. Adam therefore uses additional memory to store these moving averages.
+
+### Adam is not AdamW
+
+The uploaded function implements **Adam**, not AdamW. AdamW adds decoupled weight decay to the update. This code has no weight-decay argument and no separate weight-decay operation, so it would be incorrect to label the run AdamW.
+
+## 20. Understanding the saved 89.88% and 96.14% results
+
+The uploaded notebook records:
+
+| Method | Learning rate | Epochs | Last displayed training accuracy |
+|---|---:|---:|---:|
+| Vanilla full-batch gradient descent | 0.15 | 150 | 89.88% |
+| NumPy Adam | 0.003 | 150 | 96.14% |
+
+For these particular saved runs, Adam's displayed training accuracy rises faster and finishes higher. This is consistent with Adam's adaptive updates being helpful for this setup, but it is not proof that Adam always wins.
+
+Important qualifications:
+
+1. The learning rates differ. This compares two optimizer-and-learning-rate configurations, not only two optimizer names.
+2. Each function calls init_params() separately. The runs therefore start from different random initial weights; the notebook does not set a seed.
+3. Both methods use full-batch updates, not mini-batches.
+4. Accuracy is computed from A2 calculated before the parameter update in that epoch. It is a pre-update training metric.
+5. The outputs are training accuracy. Neither cell computes accuracy across the 10,000 test examples.
+6. No explicit cross-entropy values are logged, so the accuracy table does not show the loss curve.
+
+The defensible conclusion is: **in the saved experiment, the Adam configuration reached 96.14% displayed training accuracy after 150 epochs, while vanilla gradient descent reached 89.88%.** This does not establish 96.14% test accuracy, and it does not show AdamW.
+
+A fairer follow-up experiment should use the same fixed initial weights for both optimizers, set and record a random seed, tune each learning rate on validation data, calculate loss and accuracy after updates using a fresh forward pass, report training and validation curves, evaluate each selected model once on the untouched 10,000-example test set, and repeat with multiple seeds for a robust comparison.
+
+The trained parameter variables from the saved notebook are W1, b1, W2, b2 for vanilla gradient descent, and W1_adam, b1_adam, W2_adam, b2_adam for Adam.
