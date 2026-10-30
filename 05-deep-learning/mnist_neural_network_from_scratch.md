@@ -493,16 +493,16 @@ The notebook prints these training-accuracy values:
 
 | Epoch | Training accuracy reported |
 |---:|---:|
-| 1 | 9.70% |
-| 15 | 76.31% |
-| 30 | 83.41% |
-| 45 | 85.95% |
-| 60 | 87.24% |
-| 75 | 88.08% |
-| 90 | 88.70% |
-| 105 | 89.15% |
-| 120 | 89.50% |
-| 135 | 89.83% |
+| 1 | 7.10% |
+| 15 | 71.71% |
+| 30 | 81.55% |
+| 45 | 84.72% |
+| 60 | 86.46% |
+| 75 | 87.55% |
+| 90 | 88.27% |
+| 105 | 88.83% |
+| 120 | 89.23% |
+| 135 | 89.59% |
 | 150 | 89.88% |
 
 The rise from about 10% toward 90% indicates that the network is learning useful relationships between pixels and labels. Ten-class random guessing would be around 10% on a balanced task, but this does not make 89.88% a test score. It is the accuracy calculated on training examples.
